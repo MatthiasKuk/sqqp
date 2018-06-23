@@ -34,7 +34,6 @@ module.exports = {
         express: true
       };
     }
-
     const parsedQuery = {};
     if (!options.express) {
       query.split('&')
