@@ -1,0 +1,25 @@
+{
+  "name": "sqqp",
+  "version": "0.1.0",
+  "description": "sqqp desc",
+  "main": "index.js",
+  "scripts": {
+    "test": "sqqp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MatthiasKuk/sqqp.git"
+  },
+  "keywords": [
+    "sequelize",
+    "query",
+    "parser",
+    "url"
+  ],
+  "author": "Matthias Kuklinski <matthias.kuk@gmail.com> (https://github.com/MatthiasKuk)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MatthiasKuk/sqqp/issues"
+  },
+  "homepage": "https://github.com/MatthiasKuk/sqqp#readme"
+}
