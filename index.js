@@ -9,9 +9,7 @@
  * @return {object}
  */
 
-function splitMultiple(queryUnitProps, queryUnitParam, delimiter) {
-  const operator = queryUnitParam[1][0];
-  const filterValues = queryUnitParam[1][1];
+function splitMultipleFilterValues(queryUnitProps, operator, filterValues, delimiter) {
   queryUnitProps[operator] = filterValues
     .substring(1, filterValues.length - 1)
     .split(delimiter);
@@ -40,10 +38,11 @@ module.exports = {
         .map(queryUnitParams => queryUnitParams.map(queryUnitParam => queryUnitParam.split(options.delimiters.value)))
         .forEach(queryUnitParam => {
           const parsedQueryUnit = {};
+          const operator = queryUnitParam[1][0];
           const filterValues = queryUnitParam[1][1];
           if ((filterValues[0] === options.delimiters.queryParams.boundaries[0]) &&
             (filterValues[filterValues.length - 1] === options.delimiters.queryParams.boundaries[1])) {
-              splitMultiple(parsedQueryUnit, queryUnitParam, options.delimiters.queryParams.delimiter);
+              splitMultipleFilterValues(parsedQueryUnit, operator, filterValues, options.delimiters.queryParams.delimiter);
             } else {
               parsedQueryUnit[queryUnitParam[1][0]] = queryUnitParam[1][1];
             }
@@ -52,14 +51,17 @@ module.exports = {
     } else {
       for (const queryUnitParam in query) {
         const parsedQueryUnit = {};
-        const operator = query[queryUnitParam];
-        parsedQueryUnit[queryUnitParam.split(options.delimiters.operator)[1]] = query[queryUnitParam];
+        const operator = queryUnitParam.split(':')[1];
+        const filterValues = query[queryUnitParam];
+        if ((filterValues[0] === options.delimiters.queryParams.boundaries[0]) &&
+          (filterValues[filterValues.length - 1] === options.delimiters.queryParams.boundaries[1])) {
+            splitMultipleFilterValues(parsedQueryUnit, operator, filterValues, options.delimiters.queryParams.delimiter);
+          } else {
+            parsedQueryUnit[queryUnitParam.split(options.delimiters.operator)[1]] = query[queryUnitParam];
+          }
         parsedQuery[queryUnitParam.split(options.delimiters.operator)[0]] = parsedQueryUnit;
       }
     }
   return parsedQuery;
   }
 };
-
-// { 'id:or': '[1,2]', 'name:eq': 'Tim' }
-// { id: { or: [1,2] }, name: { eq: 'Tim' } }
