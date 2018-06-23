@@ -1,6 +1,6 @@
 {
   "name": "sqqp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "sqqp desc",
   "main": "index.js",
   "scripts": {
@@ -21,5 +21,10 @@
   "bugs": {
     "url": "https://github.com/MatthiasKuk/sqqp/issues"
   },
-  "homepage": "https://github.com/MatthiasKuk/sqqp#readme"
+  "homepage": "https://github.com/MatthiasKuk/sqqp#readme",
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-plugin-import": "^2.12.0"
+  }
 }

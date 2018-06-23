@@ -1,5 +1,5 @@
 /**
- * @desc 
+ * @desc
  * Parses the provided parameters into objects, which correspond to the Sequelize filtering-guidelines ('where').
  * @param {string} query
  * Represents the query.
@@ -9,10 +9,14 @@
  * @return {object}
  */
 
-function splitMultipleFilterValues(queryUnitProps, operator, filterValues, delimiter) {
-  queryUnitProps[operator] = filterValues
-    .substring(1, filterValues.length - 1)
-    .split(delimiter);
+function parseQueryUnit(operator, filterValues, options) {
+  if ((filterValues[0] === options.delimiters.queryParams.boundaries[0])
+  && (filterValues[filterValues.length - 1] === options.delimiters.queryParams.boundaries[1])) {
+    return filterValues
+      .substring(1, filterValues.length - 1)
+      .split(options.delimiters.queryParams.delimiter);
+  }
+  return filterValues;
 }
 
 module.exports = {
@@ -24,11 +28,11 @@ module.exports = {
           value: '=',
           queryParams: {
             delimiter: ',',
-            boundaries: [ '[',']' ]
+            boundaries: ['[', ']']
           }
         },
         express: true
-      }
+      };
     }
 
     const parsedQuery = {};
@@ -36,32 +40,20 @@ module.exports = {
       query.split('&')
         .map(queryUnit => queryUnit.split(options.delimiters.operator))
         .map(queryUnitParams => queryUnitParams.map(queryUnitParam => queryUnitParam.split(options.delimiters.value)))
-        .forEach(queryUnitParam => {
+        .forEach((queryUnitParam) => {
           const parsedQueryUnit = {};
           const operator = queryUnitParam[1][0];
-          const filterValues = queryUnitParam[1][1];
-          if ((filterValues[0] === options.delimiters.queryParams.boundaries[0]) &&
-            (filterValues[filterValues.length - 1] === options.delimiters.queryParams.boundaries[1])) {
-              splitMultipleFilterValues(parsedQueryUnit, operator, filterValues, options.delimiters.queryParams.delimiter);
-            } else {
-              parsedQueryUnit[queryUnitParam[1][0]] = queryUnitParam[1][1];
-            }
-            parsedQuery[queryUnitParam[0]] = parsedQueryUnit;
-        })
+          parsedQueryUnit[operator] = parseQueryUnit(operator, queryUnitParam[1][1], options);
+          parsedQuery[queryUnitParam[0]] = parsedQueryUnit;
+        });
     } else {
-      for (const queryUnitParam in query) {
+      Object.keys(query).forEach((queryUnitParam) => {
         const parsedQueryUnit = {};
         const operator = queryUnitParam.split(':')[1];
-        const filterValues = query[queryUnitParam];
-        if ((filterValues[0] === options.delimiters.queryParams.boundaries[0]) &&
-          (filterValues[filterValues.length - 1] === options.delimiters.queryParams.boundaries[1])) {
-            splitMultipleFilterValues(parsedQueryUnit, operator, filterValues, options.delimiters.queryParams.delimiter);
-          } else {
-            parsedQueryUnit[queryUnitParam.split(options.delimiters.operator)[1]] = query[queryUnitParam];
-          }
+        parsedQueryUnit[operator] = parseQueryUnit(operator, query[queryUnitParam], options);
         parsedQuery[queryUnitParam.split(options.delimiters.operator)[0]] = parsedQueryUnit;
-      }
+      });
     }
-  return parsedQuery;
+    return parsedQuery;
   }
 };
