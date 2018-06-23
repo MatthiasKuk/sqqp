@@ -15,7 +15,14 @@ module.exports = {
       .map(queryUnitParams => queryUnitParams.map(queryUnitParam => queryUnitParam.split('=')))
       .forEach(queryUnitParam => {
         const p = {};
-        p[queryUnitParam[1][0]] = queryUnitParam[1][1];
+        if ((queryUnitParam[1][1][0] === '[') && (queryUnitParam[1][1][queryUnitParam[1][1].length - 1] === ']')) {
+          p[queryUnitParam[1][0]] = queryUnitParam[1][1]
+            .substring(1, queryUnitParam[1][1].length - 1)
+            .split(',');
+        } else {
+          p[queryUnitParam[1][0]] = queryUnitParam[1][1];
+        }
+        // p[queryUnitParam[1][0]] = queryUnitParam[1][1];
         queryParams[queryUnitParam[0]] = p;
       })
   return queryParams;  
