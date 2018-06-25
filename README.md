@@ -32,12 +32,14 @@ Sqqb allows for a flexible provision of query parameters. By default, the query 
 
     sqqp.parse({ 'id:or': '[1,2]', 'name:eq': 'foo', 'date:order': 'asc', 'place:order': 'desc', limit: 10 })
     /* 
-      { where: { 
+    {
+      where: { 
         id: { or: ['1', '2'] },
-        name: { eq: 'foo' } }, 
-        order: [['date', 'asc'], ['place', 'desc']], 
-        limit: 10 
-      }}
+        name: { eq: 'foo' } 
+      }, 
+      order: [['date', 'asc'], ['place', 'desc']], 
+      limit: 10 
+    } 
     */
 ```
 
@@ -68,12 +70,14 @@ Sqqp supports customized queries. For more details see the [options](#options) p
 
     sqqp.parse('id;or+(1.2)&name;eq+foo&date;order+asc&place;order+desc&limit+10', options);
     /* 
-      { where: { 
+    {
+      where: { 
         id: { or: ['1', '2'] },
-        name: { eq: 'foo' } }, 
-        order: [['date', 'asc'], ['place', 'desc']], 
-        limit: 10 
-      }}
+        name: { eq: 'foo' } 
+      }, 
+      order: [['date', 'asc'], ['place', 'desc']], 
+      limit: 10 
+    } 
     */
 ```
 
