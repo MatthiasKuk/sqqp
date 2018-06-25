@@ -9,8 +9,24 @@
  * @return {object}
  */
 
-const Query = {
-  parseFilters: (operator, filters, options) => {
+const Query = new function query() {
+  this.parse = (parsedQuery, parsedQueryUnit, key, operator, filters, options) => {
+    if (key !== options.limitId) {
+      switch (operator) {
+        case options.orderId:
+          if (parsedQuery.order === undefined) parsedQuery.order = [];
+          parsedQuery.order.push(this.parseOrder(key, filters));
+          break;
+        default:
+          if (parsedQuery.where === undefined) parsedQuery.where = {};
+          parsedQueryUnit[operator] = this.parseFilters(operator, filters, options);
+          parsedQuery.where[key] = parsedQueryUnit;
+      }
+      return parsedQuery;
+    }
+    parsedQuery.limit = parseInt(filters, 10);
+  };
+  this.parseFilters = (operator, filters, options) => {
     if ((filters[0] === options.delimiters.queryParams.boundaries[0])
     && (filters[filters.length - 1] === options.delimiters.queryParams.boundaries[1])) {
       return filters
@@ -18,12 +34,9 @@ const Query = {
         .split(options.delimiters.queryParams.delimiter);
     }
     return filters;
-  },
-  parseOrder: (key, filter) => {
-    return [key, filter];
-    // [['lastname','desc']]
-  }
-};
+  };
+  this.parseOrder = (key, filter) => [key, filter];
+}();
 
 module.exports = {
   parse: (query, options) => {
@@ -42,7 +55,7 @@ module.exports = {
         limitId: 'limit'
       };
     }
-    const parsedQuery = [{}, []];
+    const parsedQuery = {};
     if (!options.express) {
       query.split('&')
         .map(queryUnit => queryUnit.split(options.delimiters.operator))
@@ -50,31 +63,23 @@ module.exports = {
         .forEach((queryUnitParam) => {
           const parsedQueryUnit = {};
           const key = queryUnitParam[0][0];
-          const operator = queryUnitParam[1][0];
-          const filters = queryUnitParam[1][1];
-          switch (operator) {
-            case options.orderId:
-              parsedQuery[1] = Query.parseOrder(key, filters);
-              break;
-            default:
-              parsedQueryUnit[operator] = Query.parseFilters(operator, filters, options);
-              parsedQuery[0][queryUnitParam[0]] = parsedQueryUnit;
+          let operator = null;
+          let filters = null;
+          if (key !== options.limitId) {
+            [, [operator]] = queryUnitParam;
+            [, [, filters]] = queryUnitParam;
+          } else {
+            [[, filters]] = queryUnitParam;
           }
+          Query.parse(parsedQuery, parsedQueryUnit, key, operator, filters, options);
         });
     } else {
       Object.keys(query).forEach((queryUnitParam) => {
         const parsedQueryUnit = {};
-        const key = queryUnitParam.split(':')[0]
+        const key = queryUnitParam.split(':')[0];
         const operator = queryUnitParam.split(':')[1];
         const filters = query[queryUnitParam];
-        switch (operator) {
-          case options.orderId:
-            parsedQuery[1] = Query.parseOrder(key, filters);
-            break;
-          default:
-            parsedQueryUnit[operator] = Query.parseFilters(operator, filters, options);
-            parsedQuery[0][queryUnitParam.split(options.delimiters.operator)[0]] = parsedQueryUnit;
-        }
+        Query.parse(parsedQuery, parsedQueryUnit, key, operator, filters, options);
       });
     }
     return parsedQuery;
